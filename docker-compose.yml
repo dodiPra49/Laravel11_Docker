@@ -1,0 +1,72 @@
+name: lara11_docker
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lara11-app
+    container_name: lara11_app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - lara11-network
+
+  webserver:
+    image: nginx:alpine
+    container_name: lara11_webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - lara11-network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: lara11_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - lara11-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: lara11_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+    networks:
+      - lara11-network
+    depends_on:
+      - db
+
+networks:
+  lara11-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
