@@ -51,6 +51,8 @@ jobs:
 
             echo "🐳 Building and starting Docker containers..."
             docker compose up -d --build
+            echo "⏳ Waiting 10 seconds for MySQL container to initialize..."
+            sleep 10
 
             echo "📦 Installing Composer dependencies inside container..."
             docker compose exec -T app composer install --optimize-autoloader --no-dev
