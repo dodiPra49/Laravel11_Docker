@@ -49,10 +49,11 @@ jobs:
             sed -i 's|^#\?\s*DB_USERNAME=.*|DB_USERNAME=laravel|g' .env
             sed -i 's|^#\?\s*DB_PASSWORD=.*|DB_PASSWORD=root|g' .env
 
-            echo "🐳 Building and starting Docker containers..."
+            echo "🐳 Restarting Docker containers cleanly..."
+            docker compose down --remove-orphans
             docker compose up -d --build
-            echo "⏳ Waiting 10 seconds for MySQL container to initialize..."
-            sleep 10
+            echo "⏳ Waiting 15 seconds for MySQL container to initialize..."
+            sleep 15
 
             echo "📦 Installing Composer dependencies inside container..."
             docker compose exec -T app composer install --optimize-autoloader --no-dev
