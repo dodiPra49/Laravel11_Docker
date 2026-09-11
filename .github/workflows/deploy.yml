@@ -49,6 +49,10 @@ jobs:
             echo "📦 Installing Composer dependencies inside container..."
             docker compose exec -T app composer install --optimize-autoloader --no-dev
 
+            echo "🔒 Setting storage and bootstrap/cache permissions..."
+            docker compose exec -T app mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs bootstrap/cache
+            docker compose exec -T app chmod -R 777 storage bootstrap/cache
+
             echo "⚡ Running Laravel optimizations & migrations..."
             docker compose exec -T app php artisan key:generate --force
             docker compose exec -T app php artisan migrate --force
