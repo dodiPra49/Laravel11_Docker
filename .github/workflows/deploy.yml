@@ -52,8 +52,23 @@ jobs:
             echo "🐳 Restarting Docker containers cleanly..."
             docker compose down --remove-orphans
             docker compose up -d --build
-            echo "⏳ Waiting 15 seconds for MySQL container to initialize..."
-            sleep 15
+
+            echo "⏳ Waiting for MySQL database (db) to be ready..."
+            for i in {1..20}; do
+              if docker compose exec -T db mysqladmin ping -h 127.0.0.1 -u root -proot --silent; then
+                echo "✅ MySQL is up and accepting connections!"
+                break
+              fi
+              echo "Waiting for MySQL container... ($i/20)"
+              sleep 3
+            done
+
+            if ! docker compose exec -T db mysqladmin ping -h 127.0.0.1 -u root -proot --silent; then
+              echo "⚠️ MySQL failed to initialize. Recreating volume..."
+              docker compose down -v --remove-orphans
+              docker compose up -d --build
+              sleep 15
+            fi
 
             echo "📦 Installing Composer dependencies inside container..."
             docker compose exec -T app composer install --optimize-autoloader --no-dev
