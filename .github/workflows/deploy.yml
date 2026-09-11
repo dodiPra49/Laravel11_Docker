@@ -46,6 +46,9 @@ jobs:
             echo "🐳 Building and starting Docker containers..."
             docker compose up -d --build
 
+            echo "📦 Installing Composer dependencies inside container..."
+            docker compose exec -T app composer install --optimize-autoloader --no-dev
+
             echo "⚡ Running Laravel optimizations & migrations..."
             docker compose exec -T app php artisan key:generate --force
             docker compose exec -T app php artisan migrate --force
