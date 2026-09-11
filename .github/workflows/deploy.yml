@@ -1,0 +1,44 @@
+name: Deploy Laravel Docker to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    name: Deploy Application to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            echo "🚀 Navigating to project directory..."
+            cd ${{ secrets.TARGET_DIR }} || exit 1
+
+            echo "📥 Pulling latest changes from GitHub..."
+            git pull origin main
+
+            echo "🐳 Building and starting Docker containers..."
+            docker compose up -d --build
+
+            echo "⚡ Running Laravel optimizations & migrations..."
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+
+            echo "🧹 Cleaning up unused Docker images..."
+            docker image prune -f
+
+            echo "✅ Deployment completed successfully!"
