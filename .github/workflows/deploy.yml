@@ -41,13 +41,13 @@ jobs:
             fi
 
             echo "🌐 Setting APP_URL & MySQL DB configuration..."
-            sed -i 's|^APP_URL=.*|APP_URL=http://${{ secrets.VPS_HOST }}:8080|g' .env
-            sed -i 's|^DB_CONNECTION=.*|DB_CONNECTION=mysql|g' .env
-            sed -i 's|^DB_HOST=.*|DB_HOST=db|g' .env
-            sed -i 's|^DB_PORT=.*|DB_PORT=3306|g' .env
-            sed -i 's|^DB_DATABASE=.*|DB_DATABASE=laravel|g' .env
-            sed -i 's|^DB_USERNAME=.*|DB_USERNAME=laravel|g' .env
-            sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=root|g' .env
+            sed -i 's|^#\?\s*APP_URL=.*|APP_URL=http://${{ secrets.VPS_HOST }}:8080|g' .env
+            sed -i 's|^#\?\s*DB_CONNECTION=.*|DB_CONNECTION=mysql|g' .env
+            sed -i 's|^#\?\s*DB_HOST=.*|DB_HOST=db|g' .env
+            sed -i 's|^#\?\s*DB_PORT=.*|DB_PORT=3306|g' .env
+            sed -i 's|^#\?\s*DB_DATABASE=.*|DB_DATABASE=laravel|g' .env
+            sed -i 's|^#\?\s*DB_USERNAME=.*|DB_USERNAME=laravel|g' .env
+            sed -i 's|^#\?\s*DB_PASSWORD=.*|DB_PASSWORD=root|g' .env
 
             echo "🐳 Building and starting Docker containers..."
             docker compose up -d --build
@@ -61,6 +61,7 @@ jobs:
 
             echo "⚡ Running Laravel optimizations & migrations..."
             docker compose exec -T app php artisan key:generate --force
+            docker compose exec -T app php artisan config:clear
             docker compose exec -T app php artisan migrate --force
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
