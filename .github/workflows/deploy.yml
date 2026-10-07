@@ -35,6 +35,10 @@ jobs:
             echo "📥 Pulling latest changes from GitHub..."
             git pull origin main
 
+            echo "📌 Generating application version & git metadata..."
+            git log -1 --pretty=format:'{"hash":"%h","message":"%s","date":"%cd","branch":"main"}' --date=short > version.json
+            chmod 666 version.json 2>/dev/null || true
+
             if [ ! -f ".env" ]; then
               echo "📝 Creating initial .env file..."
               cp .env.example .env
@@ -72,6 +76,7 @@ jobs:
 
             echo "📦 Installing Composer dependencies inside container..."
             docker compose exec -T app composer install --optimize-autoloader --no-dev
+            docker compose exec -T app git config --global --add safe.directory '*' || true
 
             echo "🔒 Setting storage and database permissions..."
             docker compose exec -T app mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs bootstrap/cache
