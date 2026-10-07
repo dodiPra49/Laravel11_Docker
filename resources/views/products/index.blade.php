@@ -74,6 +74,9 @@
     </style>
 </head>
 <body class="py-10 px-4 sm:px-6 lg:px-8">
+    <!-- Card Info Versi & Commit Terakhir di Sudut Kanan Atas -->
+    @include('partials.app-version-card')
+
     <div class="max-w-6xl mx-auto space-y-8">
         
         <!-- Header -->
